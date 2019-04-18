@@ -1,4 +1,4 @@
-package com.example.qr_readerexample;
+package com.covisart.bekci;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -16,8 +17,11 @@ import android.widget.TextView;
 import com.dlazaro66.qrcodereaderview.QRCodeReaderView;
 import com.dlazaro66.qrcodereaderview.QRCodeReaderView.OnQRCodeReadListener;
 
-public class DecoderActivity extends AppCompatActivity
-    implements ActivityCompat.OnRequestPermissionsResultCallback, OnQRCodeReadListener {
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
+public class DecoderActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, OnQRCodeReadListener {
 
   private static final int MY_PERMISSION_REQUEST_CAMERA = 0;
 
@@ -28,18 +32,29 @@ public class DecoderActivity extends AppCompatActivity
   private CheckBox flashlightCheckBox;
   private CheckBox enableDecodingCheckBox;
   private PointsOverlayView pointsOverlayView;
+  private BackgroundMail bm;
 
-  @Override protected void onCreate(Bundle savedInstanceState) {
+  @Override protected void onCreate(Bundle savedInstanceState)
+  {
     super.onCreate(savedInstanceState);
-
     setContentView(R.layout.activity_decoder);
 
     mainLayout = (ViewGroup) findViewById(R.id.main_layout);
+    bm = new BackgroundMail(this);
+    bm.setGmailUserName("destek@covisart.com");
+    bm.setGmailPassword("aysenobat");
+    bm.setMailTo("nobatgeldi@outlook.com");
+    bm.setFormSubject("Bekci");
+    bm.setFormBody("Bekci Denetimi");
+    bm.setSendingMessage("Mesaj Gönderiliyor");
+    bm.setSendingMessageSuccess("Mesaj Gönderildi");
 
-    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-        == PackageManager.PERMISSION_GRANTED) {
+    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)== PackageManager.PERMISSION_GRANTED)
+    {
       initQRCodeReaderView();
-    } else {
+    }
+    else
+    {
       requestCameraPermission();
     }
   }
@@ -79,7 +94,11 @@ public class DecoderActivity extends AppCompatActivity
   // "text" : the text encoded in QR
   // "points" : points where QR control points are placed
   @Override public void onQRCodeRead(String text, PointF[] points) {
+
+
     resultTextView.setText(text);
+      bm.setMailTo(text);
+    //bm.setFormBody("Bekci Geldi Gitti:" + text);
     pointsOverlayView.setPoints(points);
   }
 
@@ -125,5 +144,22 @@ public class DecoderActivity extends AppCompatActivity
       }
     });
     qrCodeReaderView.startCamera();
+  }
+
+  public void SendMail(View v)
+  {
+    try
+    {
+        Date c = Calendar.getInstance().getTime();
+        SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy kk:mm:ss");
+        String formattedDate = df.format(c);
+
+        bm.setFormBody("Bekci Denetimi: " + formattedDate);
+        bm.send();
+    }
+    catch (Exception exp)
+    {
+        Log.println(Log.ERROR,"Exp:",exp.toString());
+    }
   }
 }

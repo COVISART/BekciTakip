@@ -1,4 +1,4 @@
-package com.example.qr_readerexample;
+package com.covisart.bekci;
 
 import android.content.Context;
 import android.graphics.Canvas;
