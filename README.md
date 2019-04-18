@@ -10,7 +10,7 @@ This project implements an Android view which show camera and notify when there'
 Some Classes of camera controls and autofocus are taken and slightly modified from Barcode Scanner Android App.
 
 You can also use this for Augmented Reality purposes, as you get QR control points coordinates when decoding.
-
+### Dhis project use javax mail to send mail house owner, mail detected on QR code  ###
 Usage
 -----
 
