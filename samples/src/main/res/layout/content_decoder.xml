@@ -34,17 +34,28 @@
       android:textColor="#ffffff"
       />
 
+    <Button
+        android:id="@+id/button"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_above="@+id/enable_decoding_checkbox"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/start"
+        android:onClick="SendMail"
+        android:visibility="invisible" />
+
     <CheckBox
-      android:id="@+id/enable_decoding_checkbox"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_above="@+id/flashlight_checkbox"
-      android:background="#99000000"
-      android:checked="true"
-      android:padding="16dp"
-      android:text="QR Code Okumayı Aç"
-      android:textColor="#ffffff"
-      android:textSize="14sp" />
+        android:id="@+id/enable_decoding_checkbox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/flashlight_checkbox"
+        android:background="#99000000"
+        android:checked="true"
+        android:padding="16dp"
+        android:textColor="#ffffff"
+        android:textSize="14sp"
+        android:visibility="gone" />
 
     <CheckBox
         android:id="@+id/flashlight_checkbox"
@@ -57,14 +68,5 @@
         android:text="Arka Işığı Aç"
         android:textColor="#ffffff"
         android:textSize="14sp" />
-
-    <Button
-        android:id="@+id/button"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/enable_decoding_checkbox"
-        android:onClick="SendMail"
-        android:text="Mail Gönder" />
 
 </RelativeLayout>
