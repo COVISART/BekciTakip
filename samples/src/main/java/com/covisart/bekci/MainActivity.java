@@ -25,8 +25,6 @@ public class MainActivity extends AppCompatActivity {
         db = new Database(this);
         report = findViewById(R.id.report);
         read = findViewById(R.id.read);
-        save = findViewById(R.id.saveButton);
-        mailText = findViewById(R.id.email);
     }
 
     public void openReader(View v) {
