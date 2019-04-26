@@ -18,13 +18,18 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.dlazaro66.qrcodereaderview.QRCodeReaderView;
 import com.dlazaro66.qrcodereaderview.QRCodeReaderView.OnQRCodeReadListener;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+
+import data.covisart.bekci.Database;
 
 public class DecoderActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback, OnQRCodeReadListener {
 
@@ -41,6 +46,10 @@ public class DecoderActivity extends AppCompatActivity implements ActivityCompat
     private Display display;
     private Point size;
     private Button mailButton;
+    public Database db;
+    ArrayList<HashMap<String, String>> work_list;
+    HashMap<String, String> work_detay;
+    private String Name;
 
     public final static boolean isValidEmail(CharSequence target) {
         return !TextUtils.isEmpty(target) && android.util.Patterns.EMAIL_ADDRESS.matcher(target).matches();
@@ -51,6 +60,7 @@ public class DecoderActivity extends AppCompatActivity implements ActivityCompat
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_decoder);
 
+        db = new Database(this);
         mainLayout = findViewById(R.id.main_layout);
         bm = new BackgroundMail(this);
         bm.setGmailUserName("bekci@covisart.com");
@@ -110,12 +120,8 @@ public class DecoderActivity extends AppCompatActivity implements ActivityCompat
     @Override
     public void onQRCodeRead(String text, PointF[] points) {
         resultTextView.setText(text);
-        if (isValidEmail(text)) {
-            bm.setMailTo(text);
-            mailButton.setVisibility(View.VISIBLE);
-        } else {
-            mailButton.setVisibility(View.INVISIBLE);
-        }
+        Name = text;
+        mailButton.setVisibility(View.VISIBLE);
         //bm.setFormBody("Bekci Geldi Gitti:" + text);
         pointsOverlayView.setPoints(points);
     }
@@ -172,13 +178,34 @@ public class DecoderActivity extends AppCompatActivity implements ActivityCompat
     public void SendMail(View v) {
         try {
             Date c = Calendar.getInstance().getTime();
-            SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy kk:mm:ss");
-            String formattedDate = df.format(c);
 
-            bm.setFormBody("Bekci Denetimi: " + formattedDate);
-            bm.send();
+            SimpleDateFormat tarih = new SimpleDateFormat("dd/MM/yyyy");
+            SimpleDateFormat saat = new SimpleDateFormat("kk:mm:ss");
+
+            String formattedtarih = tarih.format(c);
+            String formattedsaat = saat.format(c);
+
+            if (addToWork(Name, formattedtarih, formattedsaat, "38.681134,27.312042")) {
+                mailButton.setVisibility(View.INVISIBLE);
+            } else {
+                Toast.makeText(this, "Kayıt Başarısız oldu. Tekrar deneyin.", Toast.LENGTH_LONG).show();
+            }
         } catch (Exception exp) {
             Log.println(Log.ERROR, "Exp:", exp.toString());
+        }
+    }
+
+    public boolean addToWork(String WORK_Name, String WORK_Tarih, String WORK_Saat, String WORK_Konum) {
+        if (WORK_Name.matches("") || WORK_Tarih.matches("") || WORK_Saat.matches("") || WORK_Konum.matches("")) {
+            Toast.makeText(this, "Tüm Bilgileri Eksiksiz Doldurunuz", Toast.LENGTH_LONG).show();
+            return false;
+        } else {
+            db.WORK_Ekle(WORK_Name, WORK_Tarih, WORK_Saat, WORK_Konum);
+
+            //db.resetTables();
+            db.close();
+            Toast.makeText(this, "İş Başarıyla Kayıt Edildi. Row: " + db.getRowCount(), Toast.LENGTH_LONG).show();
+            return true;
         }
     }
 }
