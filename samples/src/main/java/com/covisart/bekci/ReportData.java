@@ -3,6 +3,7 @@ package com.covisart.bekci;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -87,7 +88,7 @@ public class ReportData extends AppCompatActivity {
         String dataset = "";
 
         for (HashMap data : workList) {
-            String saved = "Daire:" + getData(data, WORK_Name) + " Tarih:" + getData(data, WORK_Tarih) + " Saat:" + getData(data, WORK_Saat) + " Konum:" + getData(data, WORK_Konum) + "y";
+            String saved = "Daire:" + getData(data, WORK_Name) + "Tarih:" + getData(data, WORK_Tarih) + "Saat:" + getData(data, WORK_Saat) + "Konum:" + getData(data, WORK_Konum) + "y";
             dataset = dataset + saved;
         }
 
@@ -95,9 +96,16 @@ public class ReportData extends AppCompatActivity {
         String sUrl = "https://covisart.com/wp-content/service/AppService.php?data=" + dataset;
         Log.println(Log.ERROR, "HashMap: ", sUrl);
 
-        new GetUrlContentTask(this).execute(sUrl);
+        if(isNetworkConnected())
+            new GetUrlContentTask(this).execute(sUrl);
+        else
+            Toast.makeText(mContext, "İnternet bağlantısı yok.", Toast.LENGTH_LONG).show();
     }
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
+        return cm.getActiveNetworkInfo() != null;
+    }
     public String getData(HashMap data, String key) {
         try {
             return data.get(key).toString();
@@ -158,9 +166,12 @@ class GetUrlContentTask extends AsyncTask<String, Integer, String> {
         }
         String content = "", line;
         try {
-            line = rd.readLine();
-            Log.println(Log.ERROR, "doInBackground:", " rd.readLine()");
-            content += line + "\n";
+
+            if(rd!=null){
+                line = rd.readLine();
+                Log.println(Log.ERROR, "doInBackground:", " rd.readLine()");
+                content += line + "\n";
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -183,12 +194,22 @@ class GetUrlContentTask extends AsyncTask<String, Integer, String> {
     }
 
     @Override
-    protected void onPostExecute(String result) {
-        Log.println(Log.ERROR, "onPostExecute:", " Entered method");
-        Toast.makeText(mContext, "Your message was sent successfully.", Toast.LENGTH_SHORT).show();
-        db.resetTables();
-        pd.dismiss();
-        mContext.startActivity(new Intent(mContext, MainActivity.class));
+    protected void onPostExecute(String result)
+    {
+        Log.println(Log.ERROR, "onPostExecute:", result);
+        if(result.contains("true"))
+        {
+            Log.println(Log.ERROR, "onPostExecute:", " Entered method");
+            Toast.makeText(mContext, "Veriler başarı ile gönderildi.", Toast.LENGTH_SHORT).show();
+            db.resetTables();
+            pd.dismiss();
+            mContext.startActivity(new Intent(mContext, MainActivity.class));
+        }
+        else
+            {
+                Toast.makeText(mContext, "Veriler gönderilemedi.", Toast.LENGTH_SHORT).show();
+                pd.dismiss();
+            }
         super.onPostExecute(result);
     }
 }
